@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — Aline Estética</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --black:#0a0a0a; --white:#ffffff; --gold:#d4a017; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:var(--black); color:var(--white); line-height:1.6; }
+        .container { max-width:1400px; margin:0 auto; padding:40px; }
+
+        /* TABS */
+        .tabs { display:flex; gap:2px; margin-bottom:40px; border-bottom:1px solid rgba(212,160,23,0.3); }
+        .tab-btn { padding:16px 32px; background:none; border:none; border-bottom:3px solid transparent;
+            color:rgba(255,255,255,0.6); font-family:inherit; font-weight:500; cursor:pointer; transition:all .3s; }
+        .tab-btn.active { color:var(--gold); border-bottom-color:var(--gold); }
+        .tab-content { display:none; }
+        .tab-content.active { display:block; }
+
+        h1 { font-size:32px; font-weight:500; margin-bottom:10px; }
+
+        /* STATS */
+        .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:24px; margin-bottom:40px; }
+        .stat { padding:28px; border:1px solid rgba(255,255,255,0.1); text-align:center; }
+        .stat-number { font-size:36px; font-weight:600; color:var(--gold); }
+
+        /* SECTION */
+        .section { background:rgba(255,255,255,0.03); border-radius:8px; padding:36px;
+            border:1px solid rgba(255,255,255,0.07); }
+
+        /* TABLE */
+        table { width:100%; border-collapse:collapse; }
+        th { background:rgba(212,160,23,0.12); padding:16px 18px; text-align:left;
+            font-size:13px; font-weight:600; color:rgba(255,255,255,0.8); text-transform:uppercase; letter-spacing:.5px; }
+        td { padding:16px 18px; border-bottom:1px solid rgba(255,255,255,0.05); vertical-align:middle; }
+        tr:hover td { background:rgba(212,160,23,0.04); }
+
+        /* STATUS BADGES */
+        .badge { display:inline-block; padding:4px 14px; border-radius:20px; font-size:11px; font-weight:600; text-transform:uppercase; }
+        .badge-ativo      { background:rgba(40,167,69,.2);   color:#3ecf68; }
+        .badge-inativo    { background:rgba(120,120,120,.2); color:#aaa; }
+        .badge-pendente   { background:rgba(255,193,7,.2);   color:#ffc107; }
+        .badge-confirmado { background:rgba(40,167,69,.2);   color:#3ecf68; }
+        .badge-cancelado  { background:rgba(220,53,69,.2);   color:#f05060; }
+
+        /* FORM */
+        .form-panel { background:rgba(212,160,23,0.06); border:1px solid rgba(212,160,23,0.2);
+            border-radius:8px; padding:32px; margin-bottom:32px; }
+        .form-panel h2 { font-size:20px; font-weight:500; color:var(--gold); margin-bottom:28px; }
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+        .form-group { display:flex; flex-direction:column; gap:8px; margin-bottom:20px; }
+        .form-group label { font-size:13px; font-weight:600; color:rgba(255,255,255,0.7); text-transform:uppercase; letter-spacing:.4px; }
+        .form-group input, .form-group select {
+            padding:14px 16px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.15);
+            color:var(--white); border-radius:6px; font-size:15px; font-family:inherit; transition:border-color .2s; }
+        .form-group input::placeholder { color:rgba(255,255,255,0.35); }
+        .form-group select option { background:#1a1a1a; }
+        .form-group input:focus, .form-group select:focus { outline:none; border-color:var(--gold); }
+        .form-actions { display:flex; gap:12px; margin-top:8px; }
+
+        /* BUTTONS */
+        .btn { display:inline-flex; align-items:center; gap:7px; padding:10px 20px;
+            border-radius:6px; border:1.5px solid; background:none; font-family:inherit;
+            font-size:13px; font-weight:600; cursor:pointer; transition:all .25s; text-decoration:none; }
+        .btn-primary   { border-color:var(--gold); color:var(--gold); }
+        .btn-primary:hover  { background:var(--gold); color:var(--black); }
+        .btn-success   { border-color:#28a745; color:#28a745; }
+        .btn-success:hover  { background:#28a745; color:#fff; }
+        .btn-danger    { border-color:#dc3545; color:#dc3545; }
+        .btn-danger:hover   { background:#dc3545; color:#fff; }
+        .btn-info      { border-color:#4a9eff; color:#4a9eff; }
+        .btn-info:hover     { background:#4a9eff; color:#fff; }
+        .btn-wa        { border-color:#25D366; color:#25D366; }
+        .btn-wa:hover       { background:#25D366; color:#fff; }
+        .btn-ghost     { border-color:rgba(255,255,255,0.2); color:rgba(255,255,255,0.5); }
+        .btn-ghost:hover    { border-color:rgba(255,255,255,0.5); color:#fff; }
+        .btn:disabled  { opacity:.4; cursor:not-allowed; }
+
+        .actions { display:flex; gap:8px; flex-wrap:wrap; }
+
+        /* MISC */
+        .page-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; }
+        .empty { text-align:center; padding:60px 20px; opacity:.4; }
+        .empty i { font-size:52px; display:block; margin-bottom:16px; }
+        .toast { position:fixed; bottom:30px; right:30px; padding:14px 24px; border-radius:8px;
+            font-weight:600; font-size:14px; z-index:9999; opacity:0; transition:opacity .3s;
+            pointer-events:none; }
+        .toast.show { opacity:1; }
+        .toast-ok  { background:#28a745; color:#fff; }
+        .toast-err { background:#dc3545; color:#fff; }
+
+        @media(max-width:768px){
+            .container{padding:20px;}
+            .form-row{grid-template-columns:1fr;}
+            .stats{grid-template-columns:1fr 1fr;}
+            td,th{padding:10px 12px; font-size:13px;}
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('tab-bookings',this)">📅 Agendamentos</button>
+        <button class="tab-btn"        onclick="showTab('tab-services',this)">💆 Serviços</button>
+        <button class="tab-btn"        onclick="showTab('tab-config',this)">⚙️ Config</button>
+    </div>
+
+    <!-- ══════════════════ AGENDAMENTOS ══════════════════ -->
+    <div id="tab-bookings" class="tab-content active">
+        <div class="page-header">
+            <h1>Agendamentos</h1>
+            <button class="btn btn-ghost" onclick="refreshBookings()"><i class="fas fa-sync-alt"></i> Atualizar</button>
+        </div>
+        <div class="stats">
+            <div class="stat"><div class="stat-number" id="st-total">0</div><div>Total</div></div>
+            <div class="stat"><div class="stat-number" id="st-pending">0</div><div>Pendentes</div></div>
+            <div class="stat"><div class="stat-number" id="st-confirmed">0</div><div>Confirmados</div></div>
+        </div>
+        <div class="section">
+            <div id="bookings-list"></div>
+        </div>
+    </div>
+
+    <!-- ══════════════════ SERVIÇOS ══════════════════ -->
+    <div id="tab-services" class="tab-content">
+        <div class="page-header">
+            <h1>Serviços</h1>
+            <button class="btn btn-primary" onclick="openServiceForm(null)">
+                <i class="fas fa-plus"></i> Novo Serviço
+            </button>
+        </div>
+
+        <!-- Formulário (oculto por padrão) -->
+        <div class="form-panel" id="svc-form-panel" style="display:none">
+            <h2 id="svc-form-title">Novo Serviço</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Nome do Serviço *</label>
+                    <input type="text" id="f-name" placeholder="Ex: Massagem Relaxante" required>
+                </div>
+                <div class="form-group">
+                    <label>Preço (R$) *</label>
+                    <input type="number" id="f-price" placeholder="150.00" step="0.01" min="0" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Categoria *</label>
+                    <select id="f-category">
+                        <option value="Massagem">Massagem</option>
+                        <option value="Unhas">Unhas</option>
+                        <option value="Estética">Estética</option>
+                        <option value="Depilação">Depilação</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Ícone (FontAwesome class)</label>
+                    <input type="text" id="f-icon" placeholder="fas fa-spa">
+                </div>
+            </div>
+            <div class="form-group" style="max-width:280px">
+                <label>Visibilidade no site</label>
+                <select id="f-active">
+                    <option value="1">✅ Ativo — visível no site</option>
+                    <option value="0">🚫 Inativo — oculto no site</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-primary" onclick="saveService()">
+                    <i class="fas fa-save"></i> Salvar Serviço
+                </button>
+                <button class="btn btn-ghost" onclick="closeServiceForm()">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+            </div>
+            <input type="hidden" id="f-id">
+        </div>
+
+        <!-- Tabela de serviços -->
+        <div class="section">
+            <div id="services-list"></div>
+        </div>
+    </div>
+
+    <!-- ══════════════════ CONFIG ══════════════════ -->
+    <div id="tab-config" class="tab-content">
+        <h1>Configurações</h1>
+        <div class="section" style="max-width:560px; margin-top:24px">
+            <div class="form-group">
+                <label>WhatsApp do Admin</label>
+                <input type="text" id="cfg-wa" placeholder="5511999999999">
+                <span style="font-size:12px;color:rgba(255,255,255,.4);margin-top:4px">
+                    DDI + DDD + número, sem espaços ou caracteres especiais
+                </span>
+            </div>
+            <button class="btn btn-primary" onclick="saveConfig()">
+                <i class="fas fa-save"></i> Salvar
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<!-- Toast global -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ────────────────────────────────────────────────
+// Chaves localStorage (iguais ao index.html)
+// ────────────────────────────────────────────────
+const KEY_SERVICES = 'aline_services';
+const KEY_BOOKINGS = 'aline_bookings';
+const KEY_CONFIG   = 'aline_config';
+
+// ────────────────────────────────────────────────
+// Toast helper
+// ────────────────────────────────────────────────
+function toast(msg, type = 'ok') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'toast toast-' + type + ' show';
+    setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ────────────────────────────────────────────────
+// Tabs
+// ────────────────────────────────────────────────
+function showTab(id, btn) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+}
+
+// ────────────────────────────────────────────────
+// Helpers localStorage
+// ────────────────────────────────────────────────
+function getServices() {
+    try { return JSON.parse(localStorage.getItem(KEY_SERVICES)) || defaultServices(); }
+    catch(e) { return defaultServices(); }
+}
+function setServices(arr) {
+    localStorage.setItem(KEY_SERVICES, JSON.stringify(arr));
+}
+function getBookings() {
+    try { return JSON.parse(localStorage.getItem(KEY_BOOKINGS)) || []; }
+    catch(e) { return []; }
+}
+function setBookings(arr) {
+    localStorage.setItem(KEY_BOOKINGS, JSON.stringify(arr));
+}
+function getConfig() {
+    try { return JSON.parse(localStorage.getItem(KEY_CONFIG)) || {}; }
+    catch(e) { return {}; }
+}
+
+function defaultServices() {
+    return [
+        {id:1, name:'Massagem Relaxante', price:150, category:'Massagem', icon:'fas fa-spa',           active:true},
+        {id:2, name:'Manicure',           price:80,  category:'Unhas',    icon:'fas fa-hand-sparkles',  active:true},
+        {id:3, name:'Limpeza de Pele',    price:120, category:'Estética', icon:'fas fa-magic',          active:true}
+    ];
+}
+
+// ────────────────────────────────────────────────
+// SERVIÇOS
+// ────────────────────────────────────────────────
+function renderServices() {
+    const services = getServices();
+    const el = document.getElementById('services-list');
+
+    if (services.length === 0) {
+        el.innerHTML = '<div class="empty"><i class="fas fa-store-slash"></i>Nenhum serviço cadastrado.<br>Clique em <strong>Novo Serviço</strong> para começar.</div>';
+        return;
+    }
+
+    let html = '<table><thead><tr><th>Serviço</th><th>Categoria</th><th>Preço</th><th>Status</th><th>Ações</th></tr></thead><tbody>';
+    services.forEach(s => {
+        const badgeClass = s.active ? 'badge-ativo' : 'badge-inativo';
+        const badgeLabel = s.active ? 'Ativo' : 'Inativo';
+        const priceStr   = 'R$ ' + Number(s.price).toFixed(2).replace('.', ',');
+        html += `<tr>
+            <td><i class="${s.icon || 'fas fa-spa'}" style="color:var(--gold);margin-right:10px"></i><strong>${s.name}</strong></td>
+            <td>${s.category}</td>
+            <td>${priceStr}</td>
+            <td><span class="badge ${badgeClass}">${badgeLabel}</span></td>
+            <td><div class="actions">
+                <button class="btn btn-info"   onclick="openServiceForm(${s.id})"><i class="fas fa-edit"></i> Editar</button>
+                <button class="btn btn-danger" onclick="deleteService(${s.id})"><i class="fas fa-trash"></i></button>
+            </div></td>
+        </tr>`;
+    });
+    html += '</tbody></table>';
+    el.innerHTML = html;
+}
+
+function openServiceForm(id) {
+    // Mostrar painel
+    document.getElementById('svc-form-panel').style.display = 'block';
+    // Scroll suave até o form
+    document.getElementById('svc-form-panel').scrollIntoView({behavior:'smooth', block:'start'});
+
+    if (id) {
+        // Editar existente
+        const s = getServices().find(x => x.id === id);
+        if (!s) return;
+        document.getElementById('svc-form-title').textContent = 'Editar Serviço';
+        document.getElementById('f-id').value       = s.id;
+        document.getElementById('f-name').value     = s.name;
+        document.getElementById('f-price').value    = s.price;
+        document.getElementById('f-category').value = s.category;
+        document.getElementById('f-icon').value     = s.icon || 'fas fa-spa';
+        document.getElementById('f-active').value   = s.active ? '1' : '0';
+    } else {
+        // Novo
+        document.getElementById('svc-form-title').textContent = 'Novo Serviço';
+        document.getElementById('f-id').value       = '';
+        document.getElementById('f-name').value     = '';
+        document.getElementById('f-price').value    = '';
+        document.getElementById('f-category').value = 'Massagem';
+        document.getElementById('f-icon').value     = 'fas fa-spa';
+        document.getElementById('f-active').value   = '1';
+        document.getElementById('f-name').focus();
+    }
+}
+
+function closeServiceForm() {
+    document.getElementById('svc-form-panel').style.display = 'none';
+}
+
+function saveService() {
+    const name  = document.getElementById('f-name').value.trim();
+    const price = parseFloat(document.getElementById('f-price').value);
+
+    // Validação
+    if (!name) {
+        toast('Informe o nome do serviço', 'err');
+        document.getElementById('f-name').focus();
+        return;
+    }
+    if (!price || price <= 0) {
+        toast('Informe um preço válido', 'err');
+        document.getElementById('f-price').focus();
+        return;
+    }
+
+    const editId = document.getElementById('f-id').value;
+    const service = {
+        id:       editId ? parseInt(editId) : Date.now(),
+        name:     name,
+        price:    price,
+        category: document.getElementById('f-category').value,
+        icon:     document.getElementById('f-icon').value.trim() || 'fas fa-spa',
+        active:   document.getElementById('f-active').value === '1'
+    };
+
+    let services = getServices();
+
+    if (editId) {
+        const idx = services.findIndex(s => s.id === service.id);
+        if (idx !== -1) services[idx] = service;
+        else services.push(service);
+    } else {
+        services.push(service);
+    }
+
+    setServices(services);
+    renderServices();
+    closeServiceForm();
+    toast('✅ Serviço salvo com sucesso!');
+}
+
+function deleteService(id) {
+    if (!confirm('Excluir este serviço? Ele sumirá do site imediatamente.')) return;
+    const services = getServices().filter(s => s.id !== id);
+    setServices(services);
+    renderServices();
+    toast('Serviço excluído');
+}
+
+// ────────────────────────────────────────────────
+// AGENDAMENTOS
+// ────────────────────────────────────────────────
+function refreshBookings() { renderBookings(); }
+
+function renderBookings() {
+    const bookings = getBookings();
+    document.getElementById('st-total').textContent     = bookings.length;
+    document.getElementById('st-pending').textContent   = bookings.filter(b => b.status === 'Pendente').length;
+    document.getElementById('st-confirmed').textContent = bookings.filter(b => b.status === 'Confirmado').length;
+
+    const el = document.getElementById('bookings-list');
+    if (bookings.length === 0) {
+        el.innerHTML = '<div class="empty"><i class="fas fa-calendar-times"></i>Nenhum agendamento ainda.</div>';
+        return;
+    }
+
+    let html = '<table><thead><tr><th>Cliente</th><th>Serviço</th><th>Data / Hora</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead><tbody>';
+    bookings.slice(0, 100).forEach(b => {
+        const sc = (b.status || 'pendente').toLowerCase();
+        const priceStr = 'R$ ' + Number(b.price).toFixed(2).replace('.', ',');
+        html += `<tr>
+            <td><strong>${b.name}</strong><br><small style="opacity:.55">${b.phone}</small></td>
+            <td>${b.service}</td>
+            <td>${b.date}<br><strong>${b.time}</strong></td>
+            <td>${priceStr}</td>
+            <td><span class="badge badge-${sc}">${b.status}</span></td>
+            <td><div class="actions">
+                ${b.status === 'Pendente' ? `<button class="btn btn-success" onclick="confirmBooking(${b.id})"><i class="fas fa-check"></i> Confirmar</button>` : ''}
+                ${b.status !== 'Cancelado' ? `<button class="btn btn-danger" onclick="cancelBooking(${b.id})"><i class="fas fa-times"></i></button>` : ''}
+                <button class="btn btn-wa" onclick="sendWA(${b.id})"><i class="fab fa-whatsapp"></i></button>
+            </div></td>
+        </tr>`;
+    });
+    html += '</tbody></table>';
+    el.innerHTML = html;
+}
+
+function confirmBooking(id) {
+    const bookings = getBookings();
+    const b = bookings.find(x => x.id === id);
+    if (!b) return;
+    b.status = 'Confirmado';
+    setBookings(bookings);
+    renderBookings();
+    toast('Agendamento confirmado!');
+    setTimeout(() => sendWA(id), 400);
+}
+
+function cancelBooking(id) {
+    if (!confirm('Cancelar este agendamento?')) return;
+    const bookings = getBookings();
+    const b = bookings.find(x => x.id === id);
+    if (!b) return;
+    b.status = 'Cancelado';
+    setBookings(bookings);
+    renderBookings();
+    toast('Agendamento cancelado');
+}
+
+function sendWA(id) {
+    const b   = getBookings().find(x => x.id === id);
+    const cfg = getConfig();
+    if (!b) return;
+    const phone = b.phone || cfg.whatsapp || '5511999999999';
+    const msg = b.status === 'Confirmado'
+        ? `✅ *AGENDAMENTO CONFIRMADO*\n\nOlá, ${b.name}! 🌸\n\n📅 ${b.date} às ${b.time}\n💆‍♀️ ${b.service}\n💰 R$ ${Number(b.price).toFixed(2).replace('.',',')}\n\nAguardamos você! — Aline Estética`
+        : `📋 Aline Estética — Agendamento\n\nCliente: ${b.name}\nTelefone: ${b.phone}\nServiço: ${b.service}\nData: ${b.date} às ${b.time}`;
+    window.open('https://wa.me/' + phone.replace(/\D/g,'') + '?text=' + encodeURIComponent(msg), '_blank');
+}
+
+// ────────────────────────────────────────────────
+// CONFIG
+// ────────────────────────────────────────────────
+function loadConfig() {
+    const cfg = getConfig();
+    document.getElementById('cfg-wa').value = cfg.whatsapp || '';
+}
+
+function saveConfig() {
+    const wa = document.getElementById('cfg-wa').value.trim().replace(/\D/g,'');
+    if (!wa) { toast('Informe o número do WhatsApp', 'err'); return; }
+    localStorage.setItem(KEY_CONFIG, JSON.stringify({ whatsapp: wa }));
+    toast('✅ Configurações salvas!');
+}
+
+// ────────────────────────────────────────────────
+// INIT — sem setInterval que conflite com inputs
+// ────────────────────────────────────────────────
+renderBookings();
+renderServices();
+loadConfig();
+
+// Só atualiza agendamentos em background (não mexe no formulário de serviços)
+setInterval(renderBookings, 8000);
+</script>
+</body>
+</html>
